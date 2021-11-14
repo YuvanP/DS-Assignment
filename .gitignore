@@ -1,0 +1,11 @@
+# Ignore C object files
+*.o
+
+# Ignore exe and output files
+*.exe
+
+# Ignore temp files
+*temp*
+
+# Ignore pdf files
+*.pdf
