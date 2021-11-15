@@ -4,9 +4,8 @@
 
 int main()
 {
-    r_node *head;
+    r_node *head = NULL;
     stack_e *stack_head = NULL;
-    head = NULL;
     FILE *fp = fopen("test.txt", "r");
 
     if (fp == NULL)
@@ -26,5 +25,23 @@ int main()
 
     display(head);
 
+    // d_node *res;
+    // res = search(head, 0, 2);
+    // if (res != NULL)
+    // {   
+    //     if (res->right != NULL)
+    //         printf("Right: (%d, %d) ", res->right->cord.x, res->right->cord.y);
+    //     else
+    //         printf("Right: %s ", (char *) res->right);
+        
+    //     if (res->down != NULL)
+    //         printf("Down: (%d, %d)", res->down->cord.x, res->down->cord.y);
+    //     else
+    //         printf("Down: %s", (char *) res->down);
+    // }
+    // else
+    //     printf("\nNode Doesn't exist");
+
     find_path(head, &start, &end, &stack_head);
+    display_stack(stack_head);
 }

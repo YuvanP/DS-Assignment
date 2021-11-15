@@ -164,16 +164,26 @@ void find_down(r_node *head) // traversing each data node and finding down part 
 
 int move_right(d_node *data)
 {
-	if (data->right->cord.y == data->cord.y + 1)
-		return 1;
-	else
+    if (data->right != NULL)
+    {
+        if (data->right->cord.y == data->cord.y + 1)
+            return 1;
+        else
+            return 0;
+    }
+    else
         return 0;
 }
 
 int move_down(d_node *data)
 {
-    if (data->down->cord.x == data->cord.x + 1)
-        return 1;
+    if (data->down != NULL)
+    {
+        if (data->down->cord.x == data->cord.x + 1)
+            return 1;
+        else
+            return 0;
+    }
     else
         return 0;
 }
@@ -229,18 +239,47 @@ void find_path(r_node *head, coord *start, coord *end, stack_e **stack_head)
     if (bot_ptr != NULL)
     {
         bot_ptr->visited = 1;
-        while (bot_ptr->cord.x <= end->x && bot_ptr->cord.y <= end->y)
+        push(stack_head, bot_ptr, &top);
+        while (bot_ptr->cord.x != end->x || bot_ptr->cord.y != end->y)
         {
-            printf("%d ", move_right(bot_ptr) && (bot_ptr->right->visited != 1));
-            if (move_right(bot_ptr) && (bot_ptr->right->visited != 1))
-            {
-                bot_ptr = bot_ptr->right;
-                bot_ptr->visited = 1;
-                push(stack_head, bot_ptr, &top);
+            if (bot_ptr->cord.y < end->y && bot_ptr->cord.x != end->x)
+            {    
+                if (move_right(bot_ptr) && (bot_ptr->right->visited != 1))
+                {
+                    bot_ptr = bot_ptr->right;
+                    bot_ptr->visited = 1;
+                    push(stack_head, bot_ptr, &top);
+                }
+                else if (move_down(bot_ptr) && (bot_ptr->down->visited != 1))
+                {
+                    bot_ptr = bot_ptr->down;
+                    bot_ptr->visited = 1;
+                    push(stack_head, bot_ptr, &top);
+                }
+                else
+                {
+                    pop(stack_head, &top);
+                    bot_ptr = top->data;
+                }
             }
             else
-                break;
+                if (move_down(bot_ptr) && (bot_ptr->down->visited != 1))
+                {
+                    bot_ptr = bot_ptr->down;
+                    bot_ptr->visited = 1;
+                    push(stack_head, bot_ptr, &top);
+                }
+                else if (move_right(bot_ptr) && (bot_ptr->right->visited != 1))
+                {
+                    bot_ptr = bot_ptr->right;
+                    bot_ptr->visited = 1;
+                    push(stack_head, bot_ptr, &top);
+                }
+                else
+                {
+                    pop(stack_head, &top);
+                    bot_ptr = top->data;
+                }
         }
-        display_stack(*stack_head);
     }
 }
