@@ -4,8 +4,9 @@
 # Ignore exe and output files
 *.exe
 
-# Ignore temp files
+# Ignore temp and test files
 *temp*
+*test*
 
 # Ignore pdf files
 *.pdf

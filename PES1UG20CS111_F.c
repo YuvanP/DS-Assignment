@@ -22,9 +22,11 @@ void insert_dnode(r_node *row, d_node *data)
     }
 }
 
+// Searches for data node, returns pointer to the node if exists else returns NULL
 d_node *search(r_node *head, int x, int y)
 {
     d_node *data;
+    // Traverse to the correct row
     while (head != NULL && head->index != x)
     {
         head = head->next;
@@ -33,6 +35,7 @@ d_node *search(r_node *head, int x, int y)
     if (head != NULL)
     {
         data = head->data_node;
+        // Traverse through the columns
         while (data != NULL && data->cord.y != y)
         {
             data = data->right;
@@ -64,7 +67,7 @@ r_node *read_map(FILE *fp)
             if (prev_row == NULL) // if it is the first row node to be inserted
                 first = temp_row;
             else
-                prev_row->next = temp_row; // else link the prev node to the newly created row node
+                prev_row->next = temp_row; // else link the prev row node to the newly created row node
 
             flag = 0;
         }
@@ -76,7 +79,6 @@ r_node *read_map(FILE *fp)
                 row_no++;
                 flag = 1;
                 index = 0;
-
                 break;
                 
             case '0':
@@ -88,14 +90,13 @@ r_node *read_map(FILE *fp)
 
                 insert_dnode(temp_row, temp_data);
                 index++;
-
                 break;
             
             case '1':
                 index++;
                 break;
             
-            default: // empty space
+            default: // empty space, ignore
                 break;
         }
     }
@@ -115,10 +116,10 @@ void display(r_node *head)
         printf("%d: ", head->index);
         while (data != NULL)
         {
-			if (data->right == NULL)
-            	printf("(%d, %d, %d)", data->cord.x, data->cord.y, data->visited);
+			if (data->right == NULL) // (%d, %d, %d) 3rd %d for checking visited flag
+            	printf("(%d, %d)", data->cord.x, data->cord.y);
 			else
-            	printf("(%d, %d, %d) -> ", data->cord.x, data->cord.y, data->visited);
+            	printf("(%d, %d) -> ", data->cord.x, data->cord.y);
             data = data->right;
         }
         printf("\n");
@@ -200,7 +201,7 @@ void display_stack(stack_e *stack_head)
 void push(stack_e **stack_head, d_node *data, stack_e **top)
 {
     stack_e *temp = (stack_e *) malloc(sizeof(stack_e));
-    temp->next = NULL;
+    temp->next = temp->prev = NULL;
     temp->data = data;
 
     if (*stack_head == NULL)
@@ -219,7 +220,6 @@ void push(stack_e **stack_head, d_node *data, stack_e **top)
 void pop(stack_e **stack_head, stack_e **top)
 {
     stack_e *to_pop = *top;
-
     if ((*top)->prev != NULL) // if the block to be freed is not the first element of stack
     {
         *top = (*top)->prev;
@@ -234,15 +234,23 @@ void pop(stack_e **stack_head, stack_e **top)
 void find_path(r_node *head, coord *start, coord *end, stack_e **stack_head)
 {
     d_node *bot_ptr = search(head, start->x, start->y);
+    d_node *end_ptr = search(head, end->x, end->y);
     stack_e *top = NULL;
 
-    if (bot_ptr != NULL)
+    if (end_ptr == NULL)
     {
+        printf("\nEnding Coordinates Not Found.");
+    }
+    else if (bot_ptr != NULL)
+    {
+        // Pushing starting node to stack
         bot_ptr->visited = 1;
         push(stack_head, bot_ptr, &top);
-        while (bot_ptr->cord.x != end->x || bot_ptr->cord.y != end->y)
+
+        while (bot_ptr != NULL && (bot_ptr->cord.x != end->x || bot_ptr->cord.y != end->y))
         {
-            if (bot_ptr->cord.y < end->y && bot_ptr->cord.x != end->x)
+            // condition where the y coordinate would match but x is still unmatched
+            if (bot_ptr->cord.y <= end->y && bot_ptr->cord.x != end->x)
             {    
                 if (move_right(bot_ptr) && (bot_ptr->right->visited != 1))
                 {
@@ -259,10 +267,16 @@ void find_path(r_node *head, coord *start, coord *end, stack_e **stack_head)
                 else
                 {
                     pop(stack_head, &top);
-                    bot_ptr = top->data;
+                    if (top != NULL)
+                        bot_ptr = top->data;
+                    else
+                    {
+                        bot_ptr = NULL;
+                    }
                 }
             }
             else
+            {
                 if (move_down(bot_ptr) && (bot_ptr->down->visited != 1))
                 {
                     bot_ptr = bot_ptr->down;
@@ -278,8 +292,44 @@ void find_path(r_node *head, coord *start, coord *end, stack_e **stack_head)
                 else
                 {
                     pop(stack_head, &top);
-                    bot_ptr = top->data;
+                    if (top != NULL)
+                        bot_ptr = top->data;
+                    else
+                    {
+                        bot_ptr = NULL;
+                    }
                 }
+            }
         }
     }
+    else
+    {
+        printf("\nStarting Coordinates Not Found.");
+    }
+    free(top);
+}
+
+void store_path(stack_e *stack_head)
+{
+    FILE *fpout = fopen("output.txt", "w+");
+
+    if (stack_head != NULL)
+    {
+        printf("\nPATH FOUND.\n");
+        while (stack_head != NULL)
+        {
+            fprintf(fpout, "(%d, %d)\n", stack_head->data->cord.x, stack_head->data->cord.y);
+            stack_head = stack_head->next;
+        }
+    }
+    else
+    {
+        printf("\nNO PATH FOUND.\n");
+        fprintf(fpout, "%d", -1);
+    }
+
+    if (fpout != NULL)
+        printf("\nOutput file generated.\n");
+    else
+        printf("\nFailed to generate output file\n");
 }

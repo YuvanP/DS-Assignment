@@ -47,6 +47,7 @@ void display_stack(stack_e *);
 int move_right(d_node *);
 int move_down(d_node *);
 void find_path(r_node *, coord *, coord *, stack_e **);
+void store_path(stack_e *);
 
 // Stack operations
 void push(stack_e **, d_node *, stack_e **);
