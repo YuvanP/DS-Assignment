@@ -306,7 +306,6 @@ void find_path(r_node *head, coord *start, coord *end, stack_e **stack_head)
     {
         printf("\nStarting Coordinates Not Found.");
     }
-    free(top);
 }
 
 void store_path(stack_e *stack_head)

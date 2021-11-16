@@ -13,8 +13,5 @@ debug:
 clean_o:
 	rm *.o
 
-clean_exe:
-	rm *.exe
-
 linux:
 	gcc -Wall PES1UG20CS111_C.c PES1UG20CS111_F.c PES1UG20CS111_H.h -o final.out
