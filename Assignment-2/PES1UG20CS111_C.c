@@ -4,8 +4,7 @@
 
 int main()
 {
-    r_node *head = NULL;
-    stack_e *stack_head = NULL;
+    v_node *adj_list;
     FILE *fp = fopen("input.txt", "r");
 
     if (fp == NULL)
@@ -19,17 +18,9 @@ int main()
     getcord(&start, fp);
     getcord(&end, fp);
 
+    // read_map(fp, &adj_list);
+    r_node *first = map(fp);
+    display_map(first);
+
     printf("\nStart: (%d, %d)\nEnd: (%d, %d)\n", start.x, start.y, end.x, end.y);
-    
-    printf("\nCreating multilinked list.\n");
-    head = read_map(fp);
-    fclose(fp);    
-
-    display(head);
-
-    printf("\nFinding Path.\n");
-    find_path(head, &start, &end, &stack_head);
-    
-    // display_stack(stack_head);
-    store_path(stack_head);
 }
