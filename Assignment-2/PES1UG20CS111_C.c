@@ -1,10 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "PES1UG20CS111_H.h"
 
 int main()
 {
-    v_node *adj_list;
+    int vertices;
     FILE *fp = fopen("input.txt", "r");
 
     if (fp == NULL)
@@ -18,9 +16,13 @@ int main()
     getcord(&start, fp);
     getcord(&end, fp);
 
-    // read_map(fp, &adj_list);
-    r_node *first = map(fp);
-    display_map(first);
-
     printf("\nStart: (%d, %d)\nEnd: (%d, %d)\n", start.x, start.y, end.x, end.y);
+    
+    vertices = num_v(fp);
+    v_node adj_list[vertices + 1];
+
+    read_map(fp, adj_list);
+    
+    printf("\nDisplaying Adjacency List.\n");
+    display_adj_list(adj_list, vertices);
 }
