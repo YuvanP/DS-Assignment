@@ -16,11 +16,17 @@ typedef struct vertex_node
 } v_node;
 
 // reading from file
-void getcord(coord *, FILE *);
-int num_v(FILE *);
-void read_map(FILE *, v_node *);
-void create_adj_list(v_node *, int);
-void insert_vnode(v_node *, int, int);
+void getcord(coord *c, FILE *fp);
+int num_v(FILE *fp);
+void read_map(FILE *fp, v_node *adj_list);
+void create_adj_list(v_node *adj_list, int vertices);
+void insert_vnode(v_node *adj_list, int src, int dest);
 
 // display functions
-void display_adj_list(v_node *, int);
+void display_adj_list(v_node *adj_list, int vertices);
+
+// finding path
+int find_vertex(v_node *adj_list, coord *loc, int vertices);
+void find_path(v_node *adj_list, int startv, int endv, int vertices, int *dfsres, int *bfsres, int *dfspath, int *bfspath);
+int dfs(v_node *adj_list, int s, int d, int vertices, int *visited, int length, int *path);
+void store_path(v_node *adj_list, int startv, int endv, int vertices, int dfsres, int bfsres, int *dfspath, int *bfspath);

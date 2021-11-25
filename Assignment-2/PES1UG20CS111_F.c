@@ -20,8 +20,8 @@ void getcord(coord *c, FILE *fp)
 void read_map(FILE *fp, v_node *adj_list)
 {
     int vertex = 1;
-    int row = 1;
-    int col = 1;
+    int row = 0;
+    int col = 0;
     char ch;
 
     while ((ch = fgetc(fp)) != EOF)
@@ -43,7 +43,7 @@ void read_map(FILE *fp, v_node *adj_list)
             break;
         
         case '\n':
-            col = 1;
+            col = 0;
             row++;
             break;
         
@@ -114,19 +114,96 @@ void create_adj_list(v_node *adj_list, int vertices)
 void display_adj_list(v_node *adj_list, int vertices)
 {
     v_node *temp; // for traversal
-    printf("[VID, (x-cord, y-cord)]\n");
+    printf("\nVID -> (x-cord, y-cord)\n");
     for (int i = 1; i <= vertices; i++)
     {
-        printf("\n[%2d, (%d, %d)]: ", adj_list[i].vid, adj_list[i].loc.x, adj_list[i].loc.y);
+        printf("\n%2d -> (%d, %d): ", adj_list[i].vid, adj_list[i].loc.x, adj_list[i].loc.y);
         
         temp = adj_list[i].next;
         while (temp != NULL)
         {
             if (temp->next != NULL)
-                printf(" [%d, (%d, %d)] -->", temp->vid, temp->loc.x, temp->loc.y);
+                printf(" [%d -> (%d, %d)] -->", temp->vid, temp->loc.x, temp->loc.y);
             else
-                printf(" [%d, (%d, %d)]", temp->vid, temp->loc.x, temp->loc.y);
+                printf(" [%d -> (%d, %d)]", temp->vid, temp->loc.x, temp->loc.y);
             temp = temp->next;
         }
     }
+}
+
+int find_vertex(v_node *adj_list, coord *loc, int vertices)
+{
+    for (int i = 1; i <= vertices; i++)
+    {
+        if (adj_list[i].loc.x == loc->x && adj_list[i].loc.y == loc->y)
+            return adj_list[i].vid;
+    }
+    return -1;
+}
+
+void find_path(v_node *adj_list, int startv, int endv, int vertices, int *dfsres, int *bfsres, int *dfspath, int *bfspath)
+{
+    if (endv == -1)
+    {
+        printf("\nDestination Vertex Not Found.");
+    }
+    else if (startv != -1)
+    {
+        int length = 0;
+        int *visited = (int *) calloc(vertices + 1, sizeof(int));
+
+        *dfsres = dfs(adj_list, startv, endv, vertices, visited, length, dfspath);
+    }
+    else
+        printf("\nSource Vertex Not Found");
+}
+
+int dfs(v_node *adj_list, int s, int d, int vertices, int *visited, int length, int *path)
+{
+    int t;
+    v_node *p;
+    visited[s] = 1;
+
+    for (p = (&adj_list[s])->next; p != NULL; p = p->next)
+    {
+        t = p->vid;
+        if (visited[t] == 0)
+        {
+            length++;
+            path[length] = t;
+            if ((t == d) || dfs(adj_list, t, d, vertices, visited, length, path))
+            {
+                return 1;
+            }
+        }
+    }
+    length--;
+    return 0;
+}
+
+void store_path(v_node *adj_list, int startv, int endv, int vertices, int dfsres, int bfsres, int *dfspath, int *bfspath)
+{
+    int temp;
+    FILE *fpout_dfs = fopen("outdfs.txt", "w+");
+
+    if (dfsres)
+    {
+        printf("\n---PATH FOUND by DFS---\n");
+        fprintf(fpout_dfs, "%d -> (%d, %d)\n", adj_list[startv].vid, adj_list[startv].loc.x, adj_list[startv].loc.y);
+        for (int i = 1; temp != endv; i++)
+        {
+            temp = dfspath[i];
+            if (temp != 0)
+            {
+                fprintf(fpout_dfs, "%d -> (%d, %d)\n", adj_list[temp].vid, adj_list[temp].loc.x, adj_list[temp].loc.y);
+            }
+        }
+    }
+    else
+    {
+        printf("\n---PATH NOT FOUND by DFS---\n");
+        fprintf(fpout_dfs, "%d\n", -1);
+    }
+
+    printf("\nOutput Files Generated.");
 }

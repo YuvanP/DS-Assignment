@@ -3,6 +3,9 @@
 int main()
 {
     int vertices;
+    int dfsres = 0;
+    int bfsres = 0;
+    int startv, endv;
     FILE *fp = fopen("input.txt", "r");
 
     if (fp == NULL)
@@ -25,4 +28,15 @@ int main()
     
     printf("\nDisplaying Adjacency List.\n");
     display_adj_list(adj_list, vertices);
+
+    printf("\n\nFinding path:\n");
+    int *dfspath = (int *) calloc(vertices, sizeof(int));
+    int *bfspath = (int *) calloc(vertices, sizeof(int));
+    startv = find_vertex(adj_list, &start, vertices);
+    endv = find_vertex(adj_list, &end, vertices);
+
+    find_path(adj_list, startv, endv, vertices, &dfsres, &bfsres, dfspath, bfspath);
+
+    store_path(adj_list, startv, endv, vertices, dfsres, bfsres, dfspath, bfspath);
+    return 0;
 }
