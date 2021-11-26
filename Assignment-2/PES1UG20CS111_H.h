@@ -28,5 +28,11 @@ void display_adj_list(v_node *adj_list, int vertices);
 // finding path
 int find_vertex(v_node *adj_list, coord *loc, int vertices);
 void find_path(v_node *adj_list, int startv, int endv, int vertices, int *dfsres, int *bfsres, int *dfspath, int *bfspath);
-int dfs(v_node *adj_list, int s, int d, int vertices, int *visited, int length, int *path);
+int dfs(v_node *adj_list, int s, int d, int *visited, int length, int *path);
+int bfs(v_node *adj_list, int s, int d, int *visited, int *path, int *queue);
 void store_path(v_node *adj_list, int startv, int endv, int vertices, int dfsres, int bfsres, int *dfspath, int *bfspath);
+
+// queue functions
+void qinsert(int *q, int *f, int *r, int k);
+int qdelete(int *q, int *f, int *r);
+int qisempty(int *f);

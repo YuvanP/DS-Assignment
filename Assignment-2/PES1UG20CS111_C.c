@@ -36,7 +36,6 @@ int main()
     endv = find_vertex(adj_list, &end, vertices);
 
     find_path(adj_list, startv, endv, vertices, &dfsres, &bfsres, dfspath, bfspath);
-
     store_path(adj_list, startv, endv, vertices, dfsres, bfsres, dfspath, bfspath);
     return 0;
 }

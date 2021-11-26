@@ -76,15 +76,9 @@ void insert_vnode(v_node *adj_list, int src, int dest)
 {
     v_node *temp = (v_node *) malloc(sizeof(v_node));
     temp->loc = adj_list[dest].loc;
-    temp->next = NULL;
     temp->vid = adj_list[dest].vid;
 
-    // inserts at front
-    if (adj_list[src].next != NULL)
-    {
-        temp->next = adj_list[src].next;
-    }
-
+    temp->next = adj_list[src].next;
     adj_list[src].next = temp;
 }
 
@@ -152,26 +146,32 @@ void find_path(v_node *adj_list, int startv, int endv, int vertices, int *dfsres
         int length = 0;
         int *visited = (int *) calloc(vertices + 1, sizeof(int));
 
-        *dfsres = dfs(adj_list, startv, endv, vertices, visited, length, dfspath);
+        *dfsres = dfs(adj_list, startv, endv, visited, length, dfspath);
+
+        int *queue = (int *) calloc(vertices, sizeof(int)); // for bfs
+        visited = (int *) calloc(vertices + 1, sizeof(int));
+
+        *bfsres = bfs(adj_list, startv, endv, visited, bfspath, queue);
     }
     else
         printf("\nSource Vertex Not Found");
 }
 
-int dfs(v_node *adj_list, int s, int d, int vertices, int *visited, int length, int *path)
+int dfs(v_node *adj_list, int s, int d, int *visited, int length, int *path)
 {
     int t;
     v_node *p;
     visited[s] = 1;
+    path[length] = s;
 
-    for (p = (&adj_list[s])->next; p != NULL; p = p->next)
+    for (p = adj_list[s].next; p != NULL; p = p->next)
     {
         t = p->vid;
         if (visited[t] == 0)
         {
             length++;
             path[length] = t;
-            if ((t == d) || dfs(adj_list, t, d, vertices, visited, length, path))
+            if ((t == d) || dfs(adj_list, t, d, visited, length, path))
             {
                 return 1;
             }
@@ -181,16 +181,80 @@ int dfs(v_node *adj_list, int s, int d, int vertices, int *visited, int length, 
     return 0;
 }
 
+int bfs(v_node *adj_list, int s, int d, int *visited, int *path, int *queue)
+{
+    int front, rear;
+    int length = 0;
+    int a, b;
+    v_node *p;
+    path[length] = s;
+
+    front = rear = -1;
+    visited[s] = 1;
+    qinsert(queue, &front, &rear, s);
+
+    while (!qisempty(&front))
+    {
+        a = qdelete(queue, &front, &rear);
+
+        for (p = adj_list[a].next; p != NULL; p = p->next)
+        {
+            b = p->vid;
+            if (visited[b] == 0)
+            {
+                visited[b] = 1;
+                length++;
+                path[length] = b;
+                if (b == d)
+                {
+                    return 1;
+                }
+
+                qinsert(queue, &front, &rear, b);
+            }
+        }   
+    }
+    return 0;
+}
+
+void qinsert(int *q, int *f, int *r, int k)
+{
+    ++*r;
+    q[*r] = k;
+
+    if (*f == -1)
+        *f = 0;
+}
+
+int qdelete(int *q, int *f, int *r)
+{
+    int t;
+    t = q[*f];
+
+    if (*f == *r)
+        *f = *r = -1;
+    else
+        ++*f;
+    return t;
+}
+
+int qisempty(int *f)
+{
+    if (*f == -1)
+        return 1;
+    return 0;
+}
+
 void store_path(v_node *adj_list, int startv, int endv, int vertices, int dfsres, int bfsres, int *dfspath, int *bfspath)
 {
-    int temp;
+    int temp = -1;
     FILE *fpout_dfs = fopen("outdfs.txt", "w+");
+    FILE *fpout_bfs = fopen("outbfs.txt", "w+");
 
     if (dfsres)
     {
         printf("\n---PATH FOUND by DFS---\n");
-        fprintf(fpout_dfs, "%d -> (%d, %d)\n", adj_list[startv].vid, adj_list[startv].loc.x, adj_list[startv].loc.y);
-        for (int i = 1; temp != endv; i++)
+        for (int i = 0; temp != endv; i++)
         {
             temp = dfspath[i];
             if (temp != 0)
@@ -203,6 +267,25 @@ void store_path(v_node *adj_list, int startv, int endv, int vertices, int dfsres
     {
         printf("\n---PATH NOT FOUND by DFS---\n");
         fprintf(fpout_dfs, "%d\n", -1);
+    }
+
+    temp = -1;
+    if (bfsres)
+    {
+        printf("\n---PATH FOUND by BFS---\n");
+        for (int i = 0; temp != endv; i++)
+        {
+            temp = bfspath[i];
+            if (temp != 0)
+            {
+                fprintf(fpout_bfs, "%d -> (%d, %d)\n", adj_list[temp].vid, adj_list[temp].loc.x, adj_list[temp].loc.y);
+            }
+        }
+    }
+    else
+    {
+        printf("\n---PATH NOT FOUND by BFS---\n");
+        fprintf(fpout_bfs, "%d\n", -1);
     }
 
     printf("\nOutput Files Generated.");
