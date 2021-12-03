@@ -152,6 +152,9 @@ void find_path(v_node *adj_list, int startv, int endv, int vertices, int *dfsres
         visited = (int *) calloc(vertices + 1, sizeof(int));
 
         *bfsres = bfs(adj_list, startv, endv, visited, bfspath, queue);
+
+        free(visited);
+        free(queue);
     }
     else
         printf("\nSource Vertex Not Found");
@@ -197,6 +200,11 @@ int bfs(v_node *adj_list, int s, int d, int *visited, int *path, int *queue)
     {
         a = qdelete(queue, &front, &rear);
 
+        if (a == d)
+        {
+            return 1;
+        }
+
         for (p = adj_list[a].next; p != NULL; p = p->next)
         {
             b = p->vid;
@@ -205,14 +213,10 @@ int bfs(v_node *adj_list, int s, int d, int *visited, int *path, int *queue)
                 visited[b] = 1;
                 length++;
                 path[length] = b;
-                if (b == d)
-                {
-                    return 1;
-                }
 
                 qinsert(queue, &front, &rear, b);
             }
-        }   
+        }
     }
     return 0;
 }
