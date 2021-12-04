@@ -143,18 +143,18 @@ void find_path(v_node *adj_list, int startv, int endv, int vertices, int *dfsres
     }
     else if (startv != -1)
     {
+        // DFS
         int length = 0;
         int *visited = (int *) calloc(vertices + 1, sizeof(int));
-
         *dfsres = dfs(adj_list, startv, endv, visited, length, dfspath);
 
-        int *queue = (int *) calloc(vertices, sizeof(int)); // for bfs
+        // BFS
         visited = (int *) calloc(vertices + 1, sizeof(int));
-
-        *bfsres = bfs(adj_list, startv, endv, visited, bfspath, queue);
+        int *prev = (int *) calloc(vertices + 1, sizeof(int));
+        bfs(adj_list, startv, endv, visited, vertices, prev);
+        *bfsres = reconstruct_from_bfs(adj_list, startv, endv, bfspath, prev);
 
         free(visited);
-        free(queue);
     }
     else
         printf("\nSource Vertex Not Found");
@@ -184,13 +184,12 @@ int dfs(v_node *adj_list, int s, int d, int *visited, int length, int *path)
     return 0;
 }
 
-int bfs(v_node *adj_list, int s, int d, int *visited, int *path, int *queue)
+void bfs(v_node *adj_list, int s, int d, int *visited, int vertices, int *prev)
 {
     int front, rear;
-    int length = 0;
     int a, b;
     v_node *p;
-    path[length] = s;
+    int *queue = (int *) calloc(vertices, sizeof(int));
 
     front = rear = -1;
     visited[s] = 1;
@@ -200,25 +199,44 @@ int bfs(v_node *adj_list, int s, int d, int *visited, int *path, int *queue)
     {
         a = qdelete(queue, &front, &rear);
 
-        if (a == d)
-        {
-            return 1;
-        }
-
         for (p = adj_list[a].next; p != NULL; p = p->next)
         {
             b = p->vid;
             if (visited[b] == 0)
             {
                 visited[b] = 1;
-                length++;
-                path[length] = b;
-
+                prev[b] = a;
                 qinsert(queue, &front, &rear, b);
             }
         }
     }
-    return 0;
+
+    free(queue);
+}
+
+int reconstruct_from_bfs(v_node* adj_list, int startv, int endv, int *bfspath, int *prev)
+{
+    int index = 0;
+    int length, temp;
+    for (int v = endv; v != 0; v = prev[v])
+    {
+        bfspath[index] = v;
+        index++;
+    }
+
+    length = index - 1;
+
+    // reversing the already reversed bfspath
+    for (int i = 0; i <= (index / 2); i++, length--)
+    {
+        temp = bfspath[length];
+        bfspath[length] = bfspath[i];
+        bfspath[i] = temp;
+    }    
+
+    if (bfspath[0] != startv)
+        return 0;
+    return 1;
 }
 
 void qinsert(int *q, int *f, int *r, int k)
@@ -293,4 +311,7 @@ void store_path(v_node *adj_list, int startv, int endv, int vertices, int dfsres
     }
 
     printf("\nOutput Files Generated.");
+
+    free(dfspath);
+    free(bfspath);
 }

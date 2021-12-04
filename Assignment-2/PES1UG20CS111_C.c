@@ -22,7 +22,7 @@ int main()
     printf("\nStart: (%d, %d)\nEnd: (%d, %d)\n", start.x, start.y, end.x, end.y);
     
     vertices = num_v(fp);
-    v_node adj_list[vertices + 1];
+    v_node *adj_list = (v_node *) malloc((vertices + 1) * sizeof(v_node));
 
     read_map(fp, adj_list);
     
@@ -32,10 +32,14 @@ int main()
     printf("\n\nFinding path:\n");
     int *dfspath = (int *) calloc(vertices, sizeof(int));
     int *bfspath = (int *) calloc(vertices, sizeof(int));
+
+    // Storing the starting and the ending coordinates
     startv = find_vertex(adj_list, &start, vertices);
     endv = find_vertex(adj_list, &end, vertices);
 
     find_path(adj_list, startv, endv, vertices, &dfsres, &bfsres, dfspath, bfspath);
     store_path(adj_list, startv, endv, vertices, dfsres, bfsres, dfspath, bfspath);
+
+    free(adj_list);
     return 0;
 }
